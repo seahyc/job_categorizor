@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from flask import Flask, jsonify, request, abort, make_response, render_template
-import analyze, ast
+import analyze, ast, sys
 
 app = Flask(__name__)
 
@@ -82,4 +82,8 @@ def weighting(tabulate, weightage):
 	return sorted(master_list, key=lambda item: -item['relevance'])
 
 if __name__ == "__main__":
-	app.run(host='0.0.0.0', port=80,debug=True)
+	if len(sys.argv)>1:
+		port = sys.argv[1]
+	else:
+		port = 5000
+	app.run(host='0.0.0.0', port=port,debug=True)
