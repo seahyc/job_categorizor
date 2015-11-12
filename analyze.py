@@ -100,13 +100,13 @@ else:
 corpus_lsi = lsi[corpus_tfidf]
 
 if arg=='new':
-	index_lsi = similarities.Similarity('/tmp/shards/', corpus_lsi, num_features=400)
+	index_lsi = similarities.Similarity('./stores/shards/', corpus_lsi, num_features=400)
 	index_lsi.save('./stores/jobs_lsi.index')
 else:
 	index_lsi = similarities.Similarity.load('./stores/jobs_lsi.index')
 
 if arg=='new':
-	index_tfidf = similarities.Similarity('/tmp/shards/', corpus_tfidf, num_features=26663)
+	index_tfidf = similarities.Similarity('./stores/shards/', corpus_tfidf, num_features=26663)
 	index_tfidf.save('./stores/jobs_tfidf.index')
 else:
 	index_tfidf = similarities.Similarity.load('./stores/jobs_tfidf.index')
@@ -162,13 +162,13 @@ corpus_lsi2 = lsi2[corpus_tfidf2]
 
 
 if arg=='new':
-	index_tfidf2 = similarities.Similarity('/tmp/shards2/', corpus_tfidf2, num_features=4480)
+	index_tfidf2 = similarities.Similarity('./stores/shards2/', corpus_tfidf2, num_features=4480)
 	index_tfidf2.save('./stores/jobs_title_tfidf.index')
 else:
 	index_tfidf2 = similarities.Similarity.load('./stores/jobs_title_tfidf.index')
 
 if arg=='new':
-	index_lsi2 = similarities.Similarity('/tmp/shards2/', corpus_lsi2, num_features=400)
+	index_lsi2 = similarities.Similarity('./stores/shards2/', corpus_lsi2, num_features=400)
 	index_lsi2.save('./stores/jobs_title_lsi.index')
 else:
 	index_lsi2 = similarities.Similarity.load('./stores/jobs_title_lsi.index')
