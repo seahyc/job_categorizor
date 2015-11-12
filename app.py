@@ -1,4 +1,4 @@
-#!ENV/bin/python
+#!/usr/local/bin/python
 
 from flask import Flask, jsonify, request, abort, make_response
 import analyze
