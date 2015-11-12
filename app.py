@@ -84,4 +84,4 @@ def weighting(tabulate, weightage):
 	return sorted(master_list, key=lambda item: -item['relevance'])
 
 if __name__ == "__main__":
-	app.run(debug=True)
+	app.run(host='0.0.0.0', port=80,debug=True)
