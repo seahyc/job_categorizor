@@ -1,0 +1,27 @@
+<h3>Dong Feng</h3>
+<h4>Intro</h4>
+<p>Dong Feng is a job categorizor. Based on a corpus of job descriptions and job titles, it'll infer the career/industry of a query job description. The corpuscraper is a scrapy spider that collects the corpus and stores it in a mongo database.</p>
+<p>Based on the gensim NLP library, the corpus and the query are both converted into the LSI and tf-idf vector space, from which similarity is inferred. </p>
+<h4>Getting Started</h4>
+<p>To get started, simply run the app like so</p>
+<p><code>./app.py</code> in your terminal</p>
+<p>This will run a Flask api server on your localhost at port 80. </p>
+<h4>Usage</h4>
+<p>To get the category inference, send a post request to <a href="http://localhost:80/api/job">http://localhost:80/api/job</a> with the header of <code>Content-Type: application/json</code> and a json object containing the following keys:</p>
+<ul>
+<li>title (job title)</li>
+<li>jd (job description)</li>
+<li>department (optional)</li>
+<li>weightage (optional)</li>
+</ul>
+<p>Every field should be a string, except for weightage. For jd, it can be a json object, converted to a string. The app will parse it accordingly and discard the keys. Of course, it can also be a string.</p>
+<p>Weightage should be a dictionary. Because the app uses several similarity querying systems, for different values, the weightage system is implemented to adjust their respective influence. The default weightage is as follows:</p>
+<p><code>weightage = {'title': 4.5,
+            'department': 5,
+            'jd': 6,
+            'naive': 2,
+            'keyword': 3.5,
+            'lsi': 5,
+            'tfidf': 4.5}</code></p>
+<h4>Demo</h4>
+<p>For a demo, simply post to <a href="http://dongfeng.glints.com/api/job">http://dongfeng.glints.com/api/job</a></p>

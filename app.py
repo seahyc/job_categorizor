@@ -1,8 +1,7 @@
 #!/usr/bin/python
 
-from flask import Flask, jsonify, request, abort, make_response
+from flask import Flask, jsonify, request, abort, make_response, render_template
 import analyze
-from pprint import pprint
 
 app = Flask(__name__)
 
@@ -14,14 +13,13 @@ weightage = {'title': 4.5,
 			'lsi': 5,
 			'tfidf': 4.5}
 
-
-@app.errorhandler(404)
-def not_found(error):
-    return make_response(jsonify({'error': 'Not found'}), 404)
-
 @app.errorhandler(400)
 def not_found(error):
     return make_response(jsonify({'error': 'Bad request'}), 400)
+
+@app.route('/')
+def root():
+	return render_template('README.html')
 
 @app.route('/api/job', methods=['POST'])
 def get_tasks():
