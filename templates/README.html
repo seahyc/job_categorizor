@@ -1,12 +1,12 @@
-<h3>Dong Feng</h3>
-<h4>Intro</h4>
-<p>Dong Feng is a job categorizor. Based on a corpus of job descriptions and job titles, it'll infer the career/industry of a query job description. The corpuscraper is a scrapy spider that collects the corpus and stores it in a mongo database.</p>
+<h3 id="dong-feng">Dong Feng</h3>
+<h4 id="intro">Intro</h4>
+<p>Dong Feng is a job categorizor. Based on a corpus of job descriptions and job titles, it&#39;ll infer the career/industry of a query job description. The corpuscraper is a scrapy spider that collects the corpus and stores it in a mongo database.</p>
 <p>Based on the gensim NLP library, the corpus and the query are both converted into the LSI and tf-idf vector space, from which similarity is inferred. </p>
-<h4>Getting Started</h4>
+<h4 id="getting-started">Getting Started</h4>
 <p>To get started, simply run the app like so</p>
 <p><code>./app.py</code> in your terminal</p>
 <p>This will run a Flask api server on your localhost at port 80. </p>
-<h4>Usage</h4>
+<h4 id="usage">Usage</h4>
 <p>To get the category inference, send a post request to <a href="http://localhost:80/api/job">http://localhost:80/api/job</a> with the header of <code>Content-Type: application/json</code> and a json object containing the following keys:</p>
 <ul>
 <li>title (job title)</li>
@@ -16,12 +16,371 @@
 </ul>
 <p>Every field should be a string, except for weightage. For jd, it can be a json object, converted to a string. The app will parse it accordingly and discard the keys. Of course, it can also be a string.</p>
 <p>Weightage should be a dictionary. Because the app uses several similarity querying systems, for different values, the weightage system is implemented to adjust their respective influence. The default weightage is as follows:</p>
-<p><code>weightage = {'title': 4.5,
-            'department': 5,
-            'jd': 6,
-            'naive': 2,
-            'keyword': 3.5,
-            'lsi': 5,
-            'tfidf': 4.5}</code></p>
-<h4>Demo</h4>
+<p><code>weightage = {&#39;title&#39;: 4.5,
+            &#39;department&#39;: 5,
+            &#39;jd&#39;: 6,
+            &#39;naive&#39;: 2,
+            &#39;keyword&#39;: 3.5,
+            &#39;lsi&#39;: 5,
+            &#39;tfidf&#39;: 4.5}</code></p>
+<h4 id="sample-post-request">Sample Post Request</h4>
+<p><em>curl Post Request</em></p>
+<p><code>curl -H &quot;Content-Type: application/json&quot; -X POST -d &#39;{&quot;title&quot;:&quot;Web Developer&quot;, &quot;jd&quot;: &quot;Develop javascript webapps&quot;}&#39; http://dongfeng.glints.com/api/job</code></p>
+<p><em>response</em></p>
+<p><code>{
+  &quot;data&quot;: [
+    {
+      &quot;career&quot;: &quot;Business Development&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;2.282301&quot;,
+        &quot;jd_lsi&quot;: &quot;0.806659720838&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.85094056651&quot;,
+        &quot;title_keyword&quot;: &quot;2.6605215&quot;,
+        &quot;title_lsi&quot;: &quot;11.7916479707&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;100.000487701&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Marketing&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;8.82492513&quot;,
+        &quot;jd_lsi&quot;: &quot;1.26733750105&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.357426018454&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;7.6347912848&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;62.0988603508&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Engineering&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;-0.214049317874&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.454233353958&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;7.93948620558&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;7.3373977676&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Consulting&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;-0.170870739967&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.42455538176&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;4.71650697291&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;4.07381731376&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Real Estate&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;-0.0686160195619&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.329489763826&quot;,
+        &quot;title_keyword&quot;: &quot;1.390977&quot;,
+        &quot;title_lsi&quot;: &quot;4.02851466089&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;3.75620247469&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Information Technology&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;0.0824373168871&quot;,
+        &quot;jd_tfidf&quot;: &quot;1.20548209548&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;17.6702038944&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;3.57244328403&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Program &amp; Product Management&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;-0.0251044845209&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.0&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;0.96159523353&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;1.95605376468&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Product Management&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;-0.0996096432209&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.307115689851&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;2.94130202383&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;1.83748111282&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Sales&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;0.313218478113&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.432498961687&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;5.70421166718&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;1.57177066108&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Art and Design&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;0.043607671978&quot;,
+        &quot;jd_tfidf&quot;: &quot;1.1030561775&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;10.6540795416&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;1.04223764586&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Legal&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;0.0&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.0&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;0.446097585373&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;0.907170395515&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Media &amp; Communications&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;0.0779810920358&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.753715636209&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;7.43663705885&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;0.888847885598&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Community &amp; Social Services&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;0.293912021443&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.353113126941&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;3.00849035382&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;0.634797557053&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Research&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;-0.115115940571&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.0973278013989&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;2.14672710747&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;0.424618044801&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Accounting&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;0.216271081008&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.0&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;0.68178689573&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;0.299513582464&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Purchasing&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;0.104743831325&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.350276364014&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;3.94566927105&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;0.294046359921&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Quality Assurance&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;0.0&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.0491639231332&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;2.5792468898&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;0.25750740623&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Education&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;0.222571464255&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.322187324055&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;1.21105165221&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;0.176197230774&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Operations&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;0.259445914999&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.112087176181&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;1.68156601489&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;0.0989940272796&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Entrepreneurship&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;0.0&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.400731682777&quot;,
+        &quot;title_keyword&quot;: &quot;0.102249&quot;,
+        &quot;title_lsi&quot;: &quot;-4.16475813836e-07&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;0.0828660391136&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Military &amp; Protective Services&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;0.0226432818454&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.0&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;1.1217459105&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;0.0511767880169&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Human Resources&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;-0.0157920399215&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.00961230500252&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;0.764319766313&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;0.0144440654075&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Finance&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;0.333504695445&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.0229446238372&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;0.865974314511&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;0.0129784335233&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Administrative&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;0.0424291344825&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.0320210934151&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;0.367463598959&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;0.000511191361777&quot;
+    },
+    {
+      &quot;career&quot;: &quot;Healthcare Services&quot;,
+      &quot;reference&quot;: {
+        &quot;department_keyword&quot;: &quot;0.0&quot;,
+        &quot;department_naive&quot;: &quot;0.0&quot;,
+        &quot;jd_keyword&quot;: &quot;0.0&quot;,
+        &quot;jd_lsi&quot;: &quot;0.0177284778329&quot;,
+        &quot;jd_tfidf&quot;: &quot;0.0382667344529&quot;,
+        &quot;title_keyword&quot;: &quot;0.0&quot;,
+        &quot;title_lsi&quot;: &quot;0.718887839466&quot;,
+        &quot;title_naive&quot;: &quot;0.0&quot;
+      },
+      &quot;relevance&quot;: &quot;0.000487701384621&quot;
+    }
+  ]
+}</code></p>
+<h4 id="demo">Demo</h4>
 <p>For a demo, simply post to <a href="http://dongfeng.glints.com/api/job">http://dongfeng.glints.com/api/job</a></p>
+
