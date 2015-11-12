@@ -1,7 +1,7 @@
 #!/usr/local/bin/python
 
 from flask import Flask, jsonify, request, abort, make_response, render_template
-import analyze
+import analyze, ast
 
 app = Flask(__name__)
 
@@ -32,7 +32,7 @@ def get_tasks():
 	if 'department' in request.json:
 		department = request.json['department']
 	if 'weightage' in request.json:
-		weight = request.json['weightage']
+		weight = ast.literal_eval(request.json['weightage'])
 	else:
 		weight = weightage
 
@@ -82,4 +82,4 @@ def weighting(tabulate, weightage):
 	return sorted(master_list, key=lambda item: -item['relevance'])
 
 if __name__ == "__main__":
-	app.run(host='0.0.0.0', port=80,debug=True)
+	app.run(host='0.0.0.0', port=5000,debug=True)
