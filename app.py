@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from flask import Flask, jsonify, request, abort, make_response, render_template
-import analyze
+import analyze, ast
 
 app = Flask(__name__)
 
@@ -32,7 +32,7 @@ def get_tasks():
 	if 'department' in request.json:
 		department = request.json['department']
 	if 'weightage' in request.json:
-		weight = request.json['weightage']
+		weight = ast.literal_eval(request.json['weightage'])
 	else:
 		weight = weightage
 

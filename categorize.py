@@ -1,4 +1,5 @@
-import psycopg2, json, sys, urllib2, re
+import psycopg2, json, sys, requests, re
+from pprint import pprint
 
 if len(sys.argv)>1:
 	arg = sys.argv[1]
@@ -10,15 +11,24 @@ with open('keys.json') as data_file:
 	user = keys[arg]['user']
 	password = keys[arg]['password']
 
-url = 'http://www.localhost:5000/api/job'
+url = 'http://localhost:5000/api/job'
 string = "dbname=" + db + " user=" + user + " host=" + host + " password=" + password
 conn = psycopg2.connect(string)
 cur = conn.cursor()
 cur.execute("SELECT \"id\", \"title\",\"department\",\"intro\", \"description\", \"descriptionV2\" FROM \"Jobs\";")
 rows = cur.fetchall()
-for row in rows[:200]:
+
+for row in rows:
 	id = row[0]
-	title = row[1]
+	with open('data.json', 'r') as infile:
+		try:
+			feeds = json.load(infile)['data']
+		except:
+			feeds = []
+	id_list = [item['jobId'] for item in feeds]
+	if id in id_list:
+		continue
+	title = row[1].decode('utf-8')
 	department = row[2]
 	intro = row[3]
 	description = row[4]
@@ -30,15 +40,31 @@ for row in rows[:200]:
 		jd["description"] = re.sub("<.*?>", " ", description)
 	if bool(descriptionV2):
 		jd["descriptionV2"] = descriptionV2
-	data = json.dumps({
+	data = {
 		"title": title,
-		"department": department,
-		"jd": jd
-	})
-	req = urllib2.Request(url, data, {'Content-Type': 'application/json'})
-	f = urllib2.urlopen(req)
-	response = f.read()
-	print response
-	f.close()
+		"jd": "json.dumps(jd)",
+		"weightage": json.dumps(
+			{'title': 55,
+			'department': 50,
+			'jd': 75,
+			'naive': 20,
+			'keyword': 35,
+			'lsi': 70,
+			'tfidf': 45
+			})
+	}
+	if bool(department):
+		data["department"] = department
+	data = json.dumps(data)
+	headers = {'Content-Type': 'application/json'}
+	r = requests.post(url, data = data, headers=headers)
+	resp = r.json()['data']
+	top = resp[0]
+	print str(id) + ': ' + title + '/' + str(department) + '--->' +top['career']
+	entry = {"jobId": id, "career": top['career'], "title": title}
+	feeds.append(entry)
+	with open('data.json', 'w') as outfile:
+		obj = {'data':feeds}
+		json.dump(obj, outfile, indent=4)
 cur.close()
 conn.close()
