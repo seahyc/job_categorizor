@@ -11,7 +11,7 @@ with open('keys.json') as data_file:
 	user = keys[arg]['user']
 	password = keys[arg]['password']
 
-url = 'http://localhost:5000/api/job'
+url = 'http://dongfeng.glints.com/api/job'
 string = "dbname=" + db + " user=" + user + " host=" + host + " password=" + password
 conn = psycopg2.connect(string)
 cur = conn.cursor()
@@ -27,6 +27,7 @@ for row in rows:
 			feeds = []
 	id_list = [item['jobId'] for item in feeds]
 	if id in id_list:
+		print 'PASS!'
 		continue
 	title = row[1].decode('utf-8')
 	department = row[2]
@@ -35,6 +36,7 @@ for row in rows:
 	descriptionV2 = row[5]
 	jd = {}
 	if bool(intro):
+		intro = intro.decode('utf-8')
 		jd["intro"] = intro
 	if bool(description):
 		jd["description"] = re.sub("<.*?>", " ", description)
@@ -54,6 +56,7 @@ for row in rows:
 			})
 	}
 	if bool(department):
+		department = department.decode('utf-8')
 		data["department"] = department
 	data = json.dumps(data)
 	headers = {'Content-Type': 'application/json'}
