@@ -1,0 +1,7 @@
+df:
+    image: docker-registry.glints.com/glints/dongfeng
+    volumes:
+        - .:/app
+    ports:
+        - "5000:5000"
+    restart: always

@@ -11,7 +11,7 @@ with open('keys.json') as data_file:
 	user = keys[arg]['user']
 	password = keys[arg]['password']
 
-url = 'http://dongfeng.glints.com/api/job'
+url = 'http://localhost:5000/api/job'
 string = "dbname=" + db + " user=" + user + " host=" + host + " password=" + password
 conn = psycopg2.connect(string)
 cur = conn.cursor()

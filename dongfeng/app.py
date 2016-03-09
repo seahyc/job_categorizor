@@ -1,7 +1,13 @@
-#!/usr/local/bin/python
-
 from flask import Flask, jsonify, request, abort, make_response, render_template
-import analyze, ast, sys
+from pymongo import MongoClient
+from datetime import datetime, timedelta
+import analyze, ast, sys, os, subprocess, json, linkedin
+with open ('keys.json') as data_file:
+	keys = json.load(data_file)['mongo']
+client = MongoClient(keys['host'], keys['port'])
+client['dongfeng'].authenticate(keys['username'], keys['password'], mechanism='SCRAM-SHA-1')
+db = client['dongfeng']
+companies = db['companies']
 
 app = Flask(__name__)
 
@@ -13,13 +19,68 @@ weightage = {'title': 4.5,
 			'lsi': 5,
 			'tfidf': 4.5}
 
+def searchCompany(companyName):
+	return companies.find_one({'name': companyName.replace(' ', '+').lower()})
+
+def checkCache(companyName):
+	cachedCompany = searchCompany(companyName)
+	if cachedCompany:
+		del cachedCompany['_id']
+		if 'industry' in cachedCompany:
+			code = 0
+			# {'message': 'Industry exists. Do not crawl.'}
+		elif checkTimeDelta(cachedCompany) < timedelta(days=7):
+			code = 1
+			# {'message': 'Industry does not exist. Do not crawl.'}
+		else:
+			code = 2
+			# {'message': 'Outdated, crawl again.'}
+		return code, cachedCompany
+	else:
+		return 3, None
+		# {'message': 'Uncached. Crawl.'}
+
+def checkTimeDelta(companyObj):
+	if 'updatedAt' in companyObj:
+		return datetime.now() - companyObj['updatedAt']
+	else:
+		return checkTimeDelta(updateCache(companyObj['name'], {}))
+
+def updateCache(companyName, updateObj):
+	companyName = companyName.replace(' ', '+').lower()
+	updateObj['updatedAt'] = datetime.utcnow()
+	companies.update_one({'name': companyName}, {'$set': updateObj}, upsert=True)
+	insert = searchCompany(companyName)
+	del insert['_id']
+	return insert
+
 @app.errorhandler(400)
 def not_found(error):
-    return make_response(jsonify({'error': 'Bad request'}), 400)
+	return make_response(jsonify({'error': str(error)}), 400)
 
 @app.route('/')
 def root():
 	return render_template('README.html')
+
+@app.route('/api/company', methods=['POST'])
+def casper():
+	companyName = request.json['company'].replace(' ', '+')
+	mongoCompany = checkCache(companyName)
+	if mongoCompany[0] == 0:
+		return jsonify({'data': mongoCompany[1]}), 200
+	elif mongoCompany[0] == 1:
+		return jsonify({'message': 'Company industry not available.'}), 404
+	APP_ROOT = os.path.dirname(os.path.realpath(__file__))
+	CASPER = 'casperjs'
+	SCRIPT =  os.path.join(APP_ROOT, 'linkedin.coffee')
+	params = CASPER + ' ' + SCRIPT + ' ' + companyName
+	try:
+		log = subprocess.check_output(params, shell=True)
+		output = ast.literal_eval(log)
+		insert = updateCache(output['name'], output)
+		return jsonify({'data': insert}), 200
+	except Exception, e:
+		return make_response(jsonify({'error': str(e)}), 400)
 
 @app.route('/api/job', methods=['POST'])
 def get_tasks():
@@ -36,10 +97,6 @@ def get_tasks():
 	else:
 		weight = weightage
 
-	# try:
-	# 	tabulate.append({'element': 'title'     , 'method': 'tfidf'  , 'result': analyze.title_tfidf(title)})
-	# except:
-	# 	print 'SEGFAULT'
 	tabulate.append({'element': 'jd'        , 'method': 'tfidf'  , 'result': analyze.jd_tfidf(jd)})
 	tabulate.append({'element': 'title'     , 'method': 'lsi'    , 'result': analyze.title_lsi(title)})
 	tabulate.append({'element': 'jd'        , 'method': 'lsi'    , 'result': analyze.jd_lsi(jd)})
@@ -86,4 +143,4 @@ if __name__ == "__main__":
 		port = int(sys.argv[1])
 	else:
 		port = 5000
-	app.run(host='0.0.0.0', port=port,debug=True)
+	app.run(host='0.0.0.0', port=port, debug=True)

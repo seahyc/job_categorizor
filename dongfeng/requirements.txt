@@ -1,0 +1,5 @@
+Flask
+gensim
+cython
+pymongo
+nltk

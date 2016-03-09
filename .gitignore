@@ -1,3 +1,5 @@
 keys*
 data.json
+companies.json
 ENV
+node_modules
